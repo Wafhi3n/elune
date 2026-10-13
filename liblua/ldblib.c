@@ -381,6 +381,24 @@ static int db_unref (lua_State *L) {
     return 0;
 }
 
+/*
+** Secret values (Forever fork, docs/specs/secret-values.md): opt-in, no global. A test makes a
+** secret with debug.newsecret and installs the client's name itself (issecretvalue = debug.issecret).
+*/
+static int db_newsecret (lua_State *L) {
+    int t = lua_type(L, 1);
+    luaL_argcheck(L, t == LUA_TSTRING || t == LUA_TNUMBER || t == LUA_TBOOLEAN, 1,
+                  "string, number or boolean expected");
+    lua_settop(L, 1);
+    lua_setsecret(L, 1);
+    return 1;
+}
+
+static int db_issecret (lua_State *L) {
+    lua_pushboolean(L, lua_issecret(L, 1));
+    return 1;
+}
+
 static const char *db_compatopts[] = { "setfenv", "gctaint", "gcdebug", "inerrorhandler", NULL };
 
 static int db_getcompatopt (lua_State *L) {
@@ -768,7 +786,9 @@ static const luaL_Reg dblib_lua[] = {
     { "getscripttimeout", db_getscripttimeout },
     { "getupvalue", db_getupvalue },
     { "iscfunction", db_iscfunction },
+    { "issecret", db_issecret },
     { "newcfunction", db_newcfunction },
+    { "newsecret", db_newsecret },
     { "ref", db_ref },
     { "setcompatopt", db_setcompatopt },
     { "seterrorhandler", db_seterrorhandler },

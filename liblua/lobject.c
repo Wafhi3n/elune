@@ -20,7 +20,7 @@
 #include "lstring.h"
 #include "lvm.h"
 
-const TValue luaO_nilobject_ = { { NULL }, NULL, LUA_TNIL };
+const TValue luaO_nilobject_ = { { NULL }, NULL, LUA_TNIL, 0 };
 
 /*
 ** converts an integer to a "floating point byte", represented as

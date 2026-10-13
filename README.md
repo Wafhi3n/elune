@@ -3,8 +3,10 @@
 > **This is the Forever fork of [Meorawr/elune](https://github.com/Meorawr/elune)**, kept for addon
 > development on WoW: Forever and the modern clients that share its UI layer. Upstream's last
 > release is v3.1 (2023); this fork builds upstream's `main` and adds what newer clients need,
-> starting with secret values. **Out of the box it behaves exactly like upstream**: every addition
-> is opt-in, so existing tests and tools see no difference.
+> starting with **secret values**: a test makes one with `debug.newsecret("Bob")`, and comparing it
+> or using it as a table key throws, as in the game client (`docs/specs/secret-values.md`).
+> **Out of the box it behaves exactly like upstream**: every addition is opt-in, so existing tests
+> and tools see no difference.
 >
 > - `main` mirrors upstream; the fork's work lives on the `forever` branch.
 > - `lua -v` reports `Elune <version>-forever.<n>`, so a script can tell which distribution runs it.

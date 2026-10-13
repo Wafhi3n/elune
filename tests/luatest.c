@@ -149,6 +149,21 @@ static void test_profilingscriptcases (void) {
     lua_close(L);
 }
 
+static void test_secretscriptcases (void) {
+    lua_State *L = luatest_newstate();
+    luaL_openlibs(L);
+
+    /* Add custom test case registration function to environment. */
+    lua_pushcclosure(L, &luatest_case, 0);
+    lua_setfield(L, LUA_GLOBALSINDEX, "case");
+
+    if (!TEST_CHECK((luaL_dofile(L, "luatest_secrets.lua") == 0))) {
+        TEST_MSG("%s", (luaL_optstring(L, -1, "<unknown script error>")));
+    }
+
+    lua_close(L);
+}
+
 /*
 ** Test Case Registration
 */
@@ -161,6 +176,7 @@ TEST_LIST = {
     { "scripted test cases", test_scriptcases },
     { "coroutine script tests", test_coroutinescriptcases },
     { "profiling script tests", test_profilingscriptcases },
+    { "secret value script tests", test_secretscriptcases },
     /* clang-format off */
     { NULL, NULL },
     /* clang-format on */

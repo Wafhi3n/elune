@@ -99,7 +99,11 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
         const TValue *tm;
         if (ttistable(t)) { /* `t' is a table? */
             Table *h = hvalue(t);
-            const TValue *res = luaH_get(h, key); /* do a primitive get */
+            const TValue *res;
+            if (ttissecret(key)) { /* refused before any lookup or metamethod */
+                luaG_secretkeyerror(L);
+            }
+            res = luaH_get(h, key); /* do a primitive get */
             if (!ttisnil(res) || /* result is no nil? */
                 (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL) { /* or no TM? */
                 setobjt2s(L, t, key, val, res);
@@ -125,7 +129,11 @@ void luaV_settable (lua_State *L, const TValue *t, TValue *key, StkId val) {
         const TValue *tm;
         if (ttistable(t)) { /* `t' is a table? */
             Table *h = hvalue(t);
-            TValue *oldval = luaH_set(L, h, key); /* do a primitive set */
+            TValue *oldval;
+            if (ttissecret(key)) { /* refused before the key is inserted */
+                luaG_secretkeyerror(L);
+            }
+            oldval = luaH_set(L, h, key); /* do a primitive set */
             if (!ttisnil(oldval) || /* result is no nil? */
                 (tm = fasttm(L, h->metatable, TM_NEWINDEX)) == NULL) { /* or no TM? */
                 setobj2t(L, t, key, oldval, val);
@@ -222,7 +230,9 @@ static int l_strcmp (const TString *ls, const TString *rs) {
 
 int luaV_lessthan (lua_State *L, const TValue *l, const TValue *r) {
     int res;
-    if (ttype(l) != ttype(r)) {
+    if (ttissecret(l) || ttissecret(r)) {
+        luaG_secretcompareerror(L);
+    } else if (ttype(l) != ttype(r)) {
         luaG_ordererror(L, l, r);
     } else if (ttisnumber(l)) {
         return luai_numlt(nvalue(l), nvalue(r));
@@ -236,7 +246,9 @@ int luaV_lessthan (lua_State *L, const TValue *l, const TValue *r) {
 
 static int lessequal (lua_State *L, const TValue *l, const TValue *r) {
     int res;
-    if (ttype(l) != ttype(r)) {
+    if (ttissecret(l) || ttissecret(r)) {
+        luaG_secretcompareerror(L);
+    } else if (ttype(l) != ttype(r)) {
         luaG_ordererror(L, l, r);
     } else if (ttisnumber(l)) {
         return luai_numle(nvalue(l), nvalue(r));
@@ -624,7 +636,8 @@ reentry: /* entry point */
             case OP_EQ: {
                 TValue *rb = RKB(i);
                 TValue *rc = RKC(i);
-                Protect(if (equalobj(L, rb, rc) == GETARG_A(i)) dojump(L, pc, GETARG_sBx(*pc));) pc++;
+                Protect(if (ttissecret(rb) || ttissecret(rc)) luaG_secretcompareerror(L);
+                        if (equalobj(L, rb, rc) == GETARG_A(i)) dojump(L, pc, GETARG_sBx(*pc));) pc++;
                 continue;
             }
             case OP_LT: {

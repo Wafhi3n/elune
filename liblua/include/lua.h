@@ -400,6 +400,13 @@ LUA_API void lua_cleartaint (lua_State *L, int n);
 LUA_API void lua_resettaint (lua_State *L);
 
 /**
+ * Secret values (Forever fork, docs/specs/secret-values.md)
+ */
+
+LUA_API void lua_setsecret (lua_State *L, int idx);
+LUA_API int lua_issecret (lua_State *L, int idx);
+
+/**
  * Profiling and Statistics APIs
  */
 

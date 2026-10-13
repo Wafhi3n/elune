@@ -637,6 +637,18 @@ void luaG_ordererror (lua_State *L, const TValue *p1, const TValue *p2) {
     }
 }
 
+/*
+** Secret values (Forever fork, docs/specs/secret-values.md). The key error is the client's own
+** text, measured in game on 2026-09-20; nobody recorded the client's text for comparisons.
+*/
+void luaG_secretkeyerror (lua_State *L) {
+    luaG_runerror(L, "attempted to index a table that cannot be indexed with secret keys");
+}
+
+void luaG_secretcompareerror (lua_State *L) {
+    luaG_runerror(L, "attempt to compare a secret value");
+}
+
 void luaG_overflowerror (lua_State *L, lua_Number n) {
     luaG_runerror(L, "integer overflow attempting to store %f", n);
 }

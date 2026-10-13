@@ -1,6 +1,15 @@
 # Changelog
 
 ## [Unreleased: Forever fork]
+### Added
+- Secret values, opt-in (`docs/specs/secret-values.md`): `debug.newsecret(v)` marks a string, number
+  or boolean, `debug.issecret(v)` tests it; C API `lua_setsecret` / `lua_issecret`. Comparing a
+  secret throws (`attempt to compare a secret value`), and so does using one as a table key, read or
+  write, `rawget` / `rawset` / `next` included (`attempted to index a table that cannot be indexed
+  with secret keys`, the client's own text). Only those two behaviors are measured in the game
+  client; everything else behaves as on the plain value. No global is added: without
+  `debug.newsecret`, nothing changes.
+
 ### Changed
 - Builds upstream's unreleased `main` (3.2).
 - `lua -v` and `luac -v` report the fork (`Elune 3.2-forever.1`), and package names carry the same

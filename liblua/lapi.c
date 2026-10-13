@@ -273,6 +273,9 @@ LUA_API int lua_equal (lua_State *L, int index1, int index2) {
     lua_lock(L); /* may call tag method */
     o1 = index2adr(L, index1);
     o2 = index2adr(L, index2);
+    if (ttissecret(o1) || ttissecret(o2)) {
+        luaG_secretcompareerror(L);
+    }
     i = (o1 == luaO_nilobject || o2 == luaO_nilobject) ? 0 : equalobj(L, o1, o2);
     lua_unlock(L);
     return i;
@@ -532,6 +535,9 @@ LUA_API void lua_rawget (lua_State *L, int idx) {
     tbl = index2adr(L, idx);
     key = L->top - 1;
     api_check(L, ttistable(tbl));
+    if (ttissecret(key)) {
+        luaG_secretkeyerror(L);
+    }
     setobjt2s(L, tbl, key, key, luaH_get(hvalue(tbl), key));
     lua_unlock(L);
 }
@@ -645,6 +651,9 @@ LUA_API void lua_rawset (lua_State *L, int idx) {
     key = L->top - 2;
     src = L->top - 1;
     api_check(L, ttistable(tbl));
+    if (ttissecret(key)) {
+        luaG_secretkeyerror(L);
+    }
     setobj2t(L, tbl, key, luaH_set(L, hvalue(tbl), key), src);
     luaC_barriert(L, hvalue(tbl), src);
     L->top -= 2;
@@ -1388,6 +1397,24 @@ LUA_API void lua_cleartaint (lua_State *L, int n) {
     for (o = L->top - n; o < L->top; o++) {
         o->taint = NULL;
     }
+}
+
+/**
+ * Secret values (Forever fork, docs/specs/secret-values.md)
+ */
+
+LUA_API void lua_setsecret (lua_State *L, int idx) {
+    StkId o;
+    lua_lock(L);
+    o = index2adr(L, idx);
+    api_checkvalidindex(L, o);
+    o->secret = 1;
+    lua_unlock(L);
+}
+
+LUA_API int lua_issecret (lua_State *L, int idx) {
+    const TValue *o = index2adr(L, idx);
+    return ttissecret(o);
 }
 
 LUA_API void lua_resettaint (lua_State *L) {

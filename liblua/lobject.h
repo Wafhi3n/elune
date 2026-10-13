@@ -62,11 +62,19 @@ typedef union {
 #define TValuefields                                                                                                   \
     Value value;                                                                                                       \
     TString *taint;                                                                                                    \
-    lu_byte tt
+    lu_byte tt;                                                                                                        \
+    lu_byte secret
 
 typedef struct lua_TValue {
     TValuefields;
 } TValue;
+
+/*
+** Secret values (Forever fork, docs/specs/secret-values.md): the mark lives on the value, not on
+** the object, so a secret string and the same plain string share one interned TString. Every
+** function that creates a value clears the mark; every copy carries it (lmanip.h).
+*/
+#define ttissecret(o) ((o)->secret != 0)
 
 /* Macros to test type */
 #define ttisnil(o) (ttype(o) == LUA_TNIL)

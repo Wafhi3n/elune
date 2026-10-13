@@ -63,8 +63,8 @@
 #define dummynode (&dummynode_)
 
 static const Node dummynode_ = {
-    { { NULL }, NULL, LUA_TNIL }, /* value */
-    { { { NULL }, NULL, LUA_TNIL, NULL } } /* key */
+    { { NULL }, NULL, LUA_TNIL, 0 }, /* value */
+    { { { NULL }, NULL, LUA_TNIL, 0, NULL } } /* key */
 };
 
 /*
@@ -149,7 +149,11 @@ static int findindex (lua_State *L, Table *t, StkId key) {
 }
 
 int luaH_next (lua_State *L, Table *t, StkId key) {
-    int i = findindex(L, t, key); /* find original element */
+    int i;
+    if (ttissecret(key)) { /* secret values, docs/specs/secret-values.md (S3) */
+        luaG_secretkeyerror(L);
+    }
+    i = findindex(L, t, key); /* find original element */
     for (i++; i < t->sizearray; i++) { /* try first array part */
         if (!ttisnil(&t->array[i])) { /* a non-nil value? */
             setnvalue(L, key, cast_num(i + 1));
