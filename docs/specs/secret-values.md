@@ -1,8 +1,8 @@
 # Secret values
 
-> Status: implemented on 2026-10-13 (criteria 1 to 3 pass locally; 4 and 5 below) · Fork decided
-> on 2026-10-12 by the maintainer (Wafhi3n); the behavior emulates only what was measured in the
-> game client, and is opt-in.
+> Status: implemented on 2026-10-13; criteria 1 to 5 met (see the end of each criterion) · Fork
+> decided on 2026-10-12 by the maintainer (Wafhi3n); the behavior emulates only what was measured
+> in the game client, and is opt-in.
 
 ## The problem
 
@@ -80,22 +80,27 @@ dated observation in the client.
 - `debug.newsecret(s)` on a secret: returns it, still secret.
 - A secret string and the same plain string share one interned string: the mark lives on the
   **value**, so `"Bob"` stays plain everywhere else.
-- A metamethod chain (`__index`, `__newindex`) with a secret key throws before the metamethod
-  runs.
+- Indexing a **table** with a secret key throws before its `__index` / `__newindex` runs, and before
+  the key is inserted. A userdata whose `__index` / `__newindex` is a function receives the secret
+  key without error: nothing about userdata was measured, so nothing is refused there.
 - Errors are ordinary Lua errors: `pcall` catches them, the message carries the usual position.
 
 ## Acceptance criteria
 
 1. [test] S1 to S8, one case each, in elune's own suite (`tests/luatest_secrets.lua`), including the
-   negative cases (a plain value still compares and indexes). → `luatest`
+   negative cases (a plain value still compares and indexes). → `luatest` (17 cases, pass)
 2. [test] Copying keeps the mark: local, upvalue, global, table value, argument, return, vararg,
-   `select`, `unpack`, `pcall`, coroutine. → same file
+   `select`, `unpack`, `pcall`, coroutine. → same file (pass)
 3. [test] Without `debug.newsecret`, nothing changes: upstream's suites (`luatest_scriptcases`,
-   coroutine, profiling) pass unchanged. → `luatest`
-4. [check] Windows, Linux and macOS builds pass CI.
-5. [human] In the WoW addon workspace (`Wafhi3n/wow-addon-tooling`), its full headless suite gives
-   the same counts as upstream elune 3.1 (109 files, 3248 checks on 2026-10-13), then one addon
-   test injects a secret name and catches the dungeon crash. Observer: the maintainer.
+   coroutine, profiling) pass unchanged. → `luatest` (pass)
+4. [check] Windows, Linux and macOS builds pass CI. → GitHub Actions run 38444699312 (2026-10-13,
+   commit d680217): all three green.
+5. [agent] In the WoW addon workspace (`Wafhi3n/wow-addon-tooling`, branch `feat/elune-forever`,
+   commit e977801), its full headless suite gives the same counts with this fork as with upstream
+   elune 3.1 (109 files, 3248 checks, 0 failures on 2026-10-13); then one addon test injects a real
+   secret name and checks that the addon's guard tests the secret before any comparison (3253
+   checks). Swapping the guard's order makes that test fail (3 failures), and under upstream elune
+   the secret part skips. Observed by the implementing session, not yet by the maintainer.
 
 ## Contract
 
