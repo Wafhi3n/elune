@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased: Forever fork]
+### Changed
+- Builds upstream's unreleased `main` (3.2).
+- `lua -v` and `luac -v` report the fork (`Elune 3.2-forever.1`), and package names carry the same
+  suffix. It is set by the `ELUNE_VERSION_SUFFIX` CMake option; the numeric version is unchanged.
+- CI: `actions/checkout` v7, `actions/upload-artifact` v7 (v3 no longer runs on GitHub),
+  `gha-setup-ninja` v6; the job may now create the draft release on new repositories.
+
 ## [Unreleased]
 ### Added
 - Added `LUA_DISABLE_LOADLIB` build option to disable the runtime dynamic module loader.

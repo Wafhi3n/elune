@@ -4,9 +4,14 @@ project(
   elune
   VERSION 3.2
   DESCRIPTION "Customized Lua 5.1 distribution aimed at replicating the World of Warcraft addon environment"
-  HOMEPAGE_URL "https://github.com/Meorawr/elune"
+  HOMEPAGE_URL "https://github.com/Wafhi3n/elune"
   LANGUAGES C
 )
+
+# Forever fork: this suffix is appended to the release string (`lua -v`, `luac -v`) and to package
+# names, so that a running interpreter tells which distribution it is. The numeric version
+# (ELUNE_VERSION_NUM, package config) stays upstream's.
+set(ELUNE_VERSION_SUFFIX "-forever.1" CACHE STRING "Suffix appended to the Elune release string and package names")
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -209,6 +214,7 @@ endif()
 
 if(BUILD_INSTALL AND BUILD_PACKAGE)
   set(CPACK_PACKAGE_VENDOR "Meorawr")
+  set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}${ELUNE_VERSION_SUFFIX}")
   string(TOLOWER "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_SYSTEM_NAME)
   set(CPACK_GENERATOR "TXZ;ZIP")
   set(CPACK_STRIP_FILES ON)
